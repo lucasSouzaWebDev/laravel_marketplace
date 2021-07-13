@@ -11,3 +11,5 @@ Homestead.yaml
 npm-debug.log
 yarn-error.log
 README-2.md
+/app/Http/Controllers/HomeController.php
+/resources/views/home.blade.php
