@@ -4,12 +4,20 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreRequest;
+use App\Traits\UploadTrait;
+use Illuminate\Support\Facades\Storage;
 
 class StoreController extends Controller
 {
+    use uploadTrait;
+    public function __construct(){
+        $this->middleware('user.has.store')->only(['create', 'store']);
+    }
+
     public function index(){
-        $stores = \App\Store::paginate(10);
-        return view('admin.stores.index', compact('stores'));
+        $store = auth()->user()->store;
+        return view('admin.stores.index', compact('store'));
     }
 
     public function create() {
@@ -17,10 +25,14 @@ class StoreController extends Controller
         return view('admin.stores.create', compact('users'));
     }
 
-    public function store(Request $request) {
+    public function store(StoreRequest $request) {
         $data = $request->all();
+        $user = auth()->user();
 
-        $user = \App\User::find($data['user']);
+        if($request->hasFile('logo')){
+            $data['logo'] = $this->imageUpload($request->file('logo'));
+        }
+
         $user->store()->create($data);
 
         flash('Loja Criada com sucesso!')->success();
@@ -32,10 +44,16 @@ class StoreController extends Controller
         return view('admin.stores.edit', compact('store'));
     }
 
-    public function update(Request $request, $store){
+    public function update(StoreRequest $request, $store){
         $data = $request->all();
-
         $store = \App\Store::find($store);
+        if($request->hasFile('logo')){
+            if(Storage::disk('public')->exists($store->logo)){
+                Storage::disk('public')->delete($store->logo);
+            }
+            $data['logo'] = $this->imageUpload($request->file('logo'));
+        }
+        
         $store->update($data);
 
         flash('Loja Atualizada com sucesso!')->success();
