@@ -42,9 +42,6 @@ class CheckoutController extends Controller
             );
         }
         
-
-        // Set your customer information.
-        // If you using SANDBOX you must use an email @sandbox.pagseguro.com.br
         $user = auth()->user();
         $email = env('PAGSEGURO_ENV') == 'sandbox' ? 'teste@sandbox.pagseguro.com.br' : $user->email;
         $creditCard->setSender()->setName($user->name);
@@ -75,7 +72,6 @@ class CheckoutController extends Controller
             'apto. 114'
         );
 
-        //Set billing information for credit card
         $creditCard->setBilling()->setAddress()->withParameters(
             'Av. Brig. Faria Lima',
             '1384',
@@ -111,7 +107,22 @@ class CheckoutController extends Controller
             \PagSeguro\Configuration\Configure::getAccountCredentials()
         );
 
-        var_dump($result);
+        $userOrder = [
+            'reference' => $reference,
+            'pagseguro_code' => $result->getCode(),
+            'pagseguro_status' => $result->getStatus(),
+            'items' => serialize($cartItems),
+            'store_id' => 42
+        ];
+
+        $user->orders()->create($userOrder);
+
+        return response()->json([
+            'data' => [
+                'status' => true,
+                'message' => 'Pedido criado com sucesso!'
+            ]
+        ]);
     }
 
     private function makePagSeguroSession()
