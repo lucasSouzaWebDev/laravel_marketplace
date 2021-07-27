@@ -7,11 +7,11 @@
 // Bootstrap
 @import '~bootstrap/scss/bootstrap';
 
-.card{
+.card-product{
     transition: 0.5s ease;
 }
 
-.card:hover{
+.card-product:hover{
     box-shadow:0 0 10px #000;
     transform: scale(1.1);
 }

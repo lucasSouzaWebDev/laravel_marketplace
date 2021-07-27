@@ -3,8 +3,8 @@
 @section('content')
     <div class="row front">
         @foreach($products as $key => $product)
-            <div class="col-md-4">
-                <div class="card text-center" style="width: 98%;">
+            <div class="col-md-3">
+                <div class="card card-product text-center" style="width: 98%;">
                     @if($product->photos->count())
                         <a href="{{route('product.single', ['slug' => $product->slug])}}"><img src="{{asset('storage/' . $product->photos->first()->image)}}" alt="" class="card-img-top"></a>
                     @else
@@ -20,7 +20,7 @@
                     </div>
                 </div>
             </div>
-        @if(($key + 1) % 3 == 0) </div><div class="row front"> @endif
+        @if(($key + 1) % 4 == 0) </div><div class="row front"> @endif
         @endforeach
     </div>
     <div class="row">
