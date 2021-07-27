@@ -32,6 +32,10 @@ class UserRegisteredEmail extends Mailable
     public function build()
     {
         date_default_timezone_set('America/Sao_Paulo');
-        return $this->view('emails.user-registered');
+        return $this
+            ->subject('Conta Criada com Sucesso!')
+            ->replyTo('lucasdesouzadubena2@gmail.com')
+            ->view('emails.user-registered')
+            ->with(['user' => $this->user]);
     }
 }
