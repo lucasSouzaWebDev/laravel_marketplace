@@ -35,6 +35,9 @@ Route::group(['middleware' => ['auth']], function(){
     Route::get('my-orders', 'UserOrderController@index')->name('user.orders');
 
     Route::prefix('admin')->name('admin.')->namespace('Admin')->group(function(){
+        Route::get('notifications', 'NotificationController@notifications')->name('notifications.index');
+        Route::get('notifications/read-all', 'NotificationController@readAll')->name('notifications.read.all');
+        Route::get('notifications/read/{notification}', 'NotificationController@read')->name('notifications.read');
         Route::resource('stores', 'StoreController');
         Route::resource('categories', 'CategoryController');
         Route::resource('products', 'ProductController');
@@ -47,4 +50,13 @@ Route::group(['middleware' => ['auth']], function(){
 
 Auth::routes();
 
-//Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/home', 'HomeController@index')->name('home');
+Route::get('not', function(){
+    /* $user = \App\User::find(41);
+    $user->notify(New \App\Notifications\StoreReceiveNewOrder);
+     $notification = $user->unreadNotifications->first();
+    $notification->markAsRead();
+    
+    
+    return $user->readNotifications; */
+});
