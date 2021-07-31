@@ -6,6 +6,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Notifications\Messages\NexmoMessage;
 
 class StoreReceiveNewOrder extends Notification
 {
@@ -29,7 +30,7 @@ class StoreReceiveNewOrder extends Notification
      */
     public function via($notifiable)
     {
-        return ['database'];
+        return ['database', 'mail', 'nexmo'];
     }
 
     /**
@@ -41,9 +42,10 @@ class StoreReceiveNewOrder extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-                    ->line('The introduction to the notification.')
-                    ->action('Notification Action', url('/'))
-                    ->line('Thank you for using our application!');
+                    ->subject('Novo pedido realizado na loja!')
+                    ->greeting('Olá vendedor, tudo bem?')
+                    ->line('Você recebeu um novo pedido na loja!')
+                    ->action('Ver pedido', route('admin.orders.my'));
     }
 
     /**
@@ -57,5 +59,12 @@ class StoreReceiveNewOrder extends Notification
         return [
             'message' => 'Você tem um novo pedido solicitado!'
         ];
+    }
+
+    public function toNexmo($notifiable)
+    {
+        return (new NexmoMessage)
+                ->content('Você recebeu um novo pedido em nosso site!')
+                ->unicode();
     }
 }
