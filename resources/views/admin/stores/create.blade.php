@@ -27,7 +27,7 @@
 
         <div class="form-group">
             <label>Telefone</label>
-            <input type="text" name="phone" class="form-control @error('phone') is-invalid @enderror" value="{{old('phone')}}">
+            <input type="text" name="phone" id="phone" class="form-control @error('phone') is-invalid @enderror" value="{{old('phone')}}">
             @error('phone')
                 <div class="invalid-feedback">
                     {{$message}}
@@ -37,7 +37,7 @@
 
         <div class="form-group">
             <label>Celular/Whatsapp</label>
-            <input type="text" name="cellphone" class="form-control @error('cellphone') is-invalid @enderror" value="{{old('cellphone')}}">
+            <input type="text" name="cellphone" id="cellphone" class="form-control @error('cellphone') is-invalid @enderror" value="{{old('cellphone')}}">
             @error('cellphone')
                 <div class="invalid-feedback">
                     {{$message}}
@@ -59,4 +59,14 @@
             <button type="submit" class="btn btn-lg btn-success">Criar Loja</button>
         </div>
     </form>
+@endsection
+
+@section('scripts')
+    <script>
+        let imPhone = new Inputmask('(99) 9999-9999');
+        imPhone.mask(document.getElementById('phone'));
+
+        let imCellPhone = new Inputmask('(99) 99999-9999');
+        imCellPhone.mask(document.getElementById('cellphone'));
+    </script>
 @endsection
