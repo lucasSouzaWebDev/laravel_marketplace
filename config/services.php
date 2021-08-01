@@ -31,7 +31,7 @@ return [
     ],
 
     'nexmo' => [
-        'sms_from' => '5542988040471',
+        'sms_from' => 'your_number_nexmo',
     ],
 
 ];
