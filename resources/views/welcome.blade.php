@@ -6,9 +6,13 @@
             <div class="col-md-3">
                 <div class="card card-product text-center" style="width: 98%;">
                     @if($product->photos->count())
-                        <a href="{{route('product.single', ['slug' => $product->slug])}}"><img src="{{asset('storage/' . $product->photos->first()->image)}}" alt="" class="card-img-top"></a>
+                        <a href="{{route('product.single', ['slug' => $product->slug])}}">
+                            <img src="{{asset('storage/' . $product->thumb)}}" alt="{{$product->name}}" class="card-img-top">
+                        </a>
                     @else
-                    <a href="{{route('product.single', ['slug' => $product->slug])}}"><img src="{{asset('assets/img/no-photo.jpg')}}" alt="Produto sem foto" class="card-img-top"></a>
+                    <a href="{{route('product.single', ['slug' => $product->slug])}}">
+                        <img src="{{asset('assets/img/no-photo.jpg')}}" alt="Produto sem foto" class="card-img-top">
+                    </a>
                     @endif
                     <div class="card-body">
                         <h2 class="card-title">{{$product->name}}</h2>
