@@ -1,4 +1,4 @@
-function proccessPayment(token){
+function proccessPayment(token, buttonTarget){
     let data = {
         card_token: token,
         hash: PagSeguroDirectPayment.getSenderHash(),
@@ -17,6 +17,13 @@ function proccessPayment(token){
             setTimeout(() => {
                 window.location.href = `${urlThanks}?order= + ${res.data.order}`;
             }, 3000);
+        },
+        error: function(error){
+            buttonTarget.disabled = false;
+            buttonTarget.textContent = 'Efetuar Pagamento';
+            let message = JSON.parse(error.responseText);
+            console.log(message);
+            document.querySelector('div.msg').innerHTML = showErrorMessages(message.data.message.error.message);
         }
     });
 }
@@ -29,12 +36,6 @@ function getInstallments(amount, brand) {
         success: function(res){
             let selectInstallments = drawSelectInstallments(res.installments[brand])
             document.querySelector('div.installments').innerHTML = selectInstallments;
-        },
-        error: function(err){
-            
-        },
-        complete: function(res){
-            
         }
     });
 }
@@ -49,4 +50,44 @@ function drawSelectInstallments(installments) {
 
     select += '</select>';
     return select;
+}
+
+function showErrorMessages(message)
+{
+    return `
+        <div class="alert alert-danger">${message}</div>
+    `;
+}
+
+function errorsMapPagseguroJS(code)
+{
+    switch(code) {
+        case "10000":
+            return 'Bandeira do cartão inválida!';
+        break;
+
+        case "10001":
+            return 'Número do Cartão com tamanho inválido!';
+        break;
+
+        case "10002":
+        case  "30405":
+            return 'Data com formato inválido!';
+        break;
+
+        case "10003":
+            return 'Código de segurança inválido';
+        break;
+
+        case "10004":
+            return 'Código de segurança é obrigatório!';
+        break;
+
+        case "10006":
+            return 'Tamanho do código de segurança inválido!';
+        break;
+
+        default:
+            return 'Houve um erro na validação do seu cartão de crédito!';
+    }
 }

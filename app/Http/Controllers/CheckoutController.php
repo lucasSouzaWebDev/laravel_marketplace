@@ -13,20 +13,25 @@ class CheckoutController extends Controller
 {
     public function index()
     {
-        if (!auth()->check()) {
-            return redirect()->route('login');
-        }
-        if(!session()->has('cart')){
-            return redirect()->route('home');
-        }
-        $this->makePagSeguroSession();
+        try{
+            if (!auth()->check()) {
+                return redirect()->route('login');
+            }
+            if(!session()->has('cart')){
+                return redirect()->route('home');
+            }
+            $this->makePagSeguroSession();
+    
+            $cartItems = array_map(function ($line) {
+                return $line['amount'] * $line['price'];
+            }, session()->get('cart'));
+    
+            $cartItems = array_sum($cartItems);
+            return view('checkout', compact('cartItems'));
 
-        $cartItems = array_map(function ($line) {
-            return $line['amount'] * $line['price'];
-        }, session()->get('cart'));
-
-        $cartItems = array_sum($cartItems);
-        return view('checkout', compact('cartItems'));
+        }catch(\Exception $e){
+            session()->forget('pagseguro_session_code');
+        }
     }
 
     public function proccess(Request $request)
@@ -65,7 +70,7 @@ class CheckoutController extends Controller
                 ]
             ]);
         } catch (\Exception  $exception) {
-            $message = env('APP_DEBUG') ? $exception->getMessage() : 'Erro ao processar pedido!';
+            $message = env('APP_DEBUG') ? simplexml_load_string($exception->getMessage()) : 'Erro ao processar pedido!';
             return response()->json([
                 'data' => [
                     'status' => false,
