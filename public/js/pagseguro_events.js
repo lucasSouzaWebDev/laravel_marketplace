@@ -18,30 +18,41 @@ cardNumber.addEventListener('keyup', function(){
     }
 });
 
-let submitButton = document.querySelector('button.processCheckout');
+let submitButton = document.querySelectorAll('button.proccessCheckout');
 
-submitButton.addEventListener('click', function(event){
-    event.preventDefault();
-    document.querySelector('div.msg').innerHTML = '';
-    let buttonTarget = event.target;
-    buttonTarget.disabled = true;
-    buttonTarget.textContent = 'Carregando...';
-    PagSeguroDirectPayment.createCardToken({
-        cardNumber:      document.querySelector('input[name=card_number]').value,
-        brand:           document.querySelector('input[name=card_brand]').value,
-        cvv:             document.querySelector('input[name=card_cvv]').value,
-        expirationMonth: document.querySelector('input[name=card_month]').value,
-        expirationYear:  document.querySelector('input[name=card_year]').value,
-        success: function(res){
-            proccessPayment(res.card.token, buttonTarget);
-        },
-        error: function(error){
-            buttonTarget.disabled = false;
-            buttonTarget.textContent = 'Efetuar Pagamento';
-            for(let i in error.errors){
-                document.querySelector('div.msg').innerHTML = showErrorMessages(errorsMapPagseguroJS(i));
-            }
-            
+submitButton.forEach(function(el, k){
+    el.addEventListener('click', function(event){
+        event.preventDefault();
+        document.querySelector('div.msg').innerHTML = '';
+        let buttonTarget = event.target;
+        buttonTarget.disabled = true;
+        buttonTarget.textContent = 'Carregando...';
+        let paymentType = event.target.dataset.paymentType;
+        if(paymentType === 'CREDITCARD'){
+            PagSeguroDirectPayment.createCardToken({
+                cardNumber:      document.querySelector('input[name=card_number]').value,
+                brand:           document.querySelector('input[name=card_brand]').value,
+                cvv:             document.querySelector('input[name=card_cvv]').value,
+                expirationMonth: document.querySelector('input[name=card_month]').value,
+                expirationYear:  document.querySelector('input[name=card_year]').value,
+                success: function(res){
+                    proccessPayment(res.card.token, buttonTarget, paymentType);
+                },
+                error: function(error){
+                    buttonTarget.disabled = false;
+                    buttonTarget.textContent = 'Efetuar Pagamento';
+                    for(let i in error.errors){
+                        document.querySelector('div.msg').innerHTML = showErrorMessages(errorsMapPagseguroJS(i));
+                    }
+                    
+                }
+            });
         }
+
+        if(paymentType === 'BOLETO'){
+            proccessPayment(null, buttonTarget, paymentType);
+        }
+        
     });
 });
+

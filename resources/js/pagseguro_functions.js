@@ -1,11 +1,15 @@
-function proccessPayment(token, buttonTarget){
+function proccessPayment(token, buttonTarget, paymentType){
     let data = {
-        card_token: token,
         hash: PagSeguroDirectPayment.getSenderHash(),
-        installment: document.querySelector('select.select_installments').value,
-        card_name: document.querySelector('input[name=card_name]').value,
+        paymentType: paymentType,
         _token: csrf
     };
+
+    if(paymentType === 'CREDITCARD'){
+        data.card_token = token;
+        data.installment = document.querySelector('select.select_installments').value;
+        data.card_name = document.querySelector('input[name=card_name]').value;
+    }
 
     $.ajax({
         type: 'POST',
@@ -13,9 +17,11 @@ function proccessPayment(token, buttonTarget){
         data: data,
         dataType: 'json',
         success: function(res){
+            let redirectUrl = `${urlThanks}?order= + ${res.data.order}`;
+            let linkBoleto = `${redirectUrl}&b=${res.data.link_boleto}`;
             toastr.success(res.data.message, 'Sucesso');
             setTimeout(() => {
-                window.location.href = `${urlThanks}?order= + ${res.data.order}`;
+                window.location.href = paymentType == 'BOLETO' ?  linkBoleto : redirectUrl;
             }, 3000);
         },
         error: function(error){

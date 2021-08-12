@@ -8,6 +8,7 @@ use App\Payment\PagSeguro\Notification;
 use App\Store;
 use Ramsey\Uuid\Uuid;
 use App\UserOrder;
+use App\Payment\PagSeguro\Boleto;
 
 class CheckoutController extends Controller
 {
@@ -43,15 +44,20 @@ class CheckoutController extends Controller
             $stores = array_unique(array_column($cartItems, 'store_id'));
             $reference = Uuid::uuid4();
 
-            $creditCardPayment = new CreditCard($cartItems, $user, $dataPost, $reference);
-            $result = $creditCardPayment->doPayment();
+            $payment = $dataPost['paymentType'] == 'BOLETO'
+                    ? new Boleto($cartItems, $user, $reference, $dataPost['hash'])
+                    : new CreditCard($cartItems, $user, $dataPost, $reference);
+            $result = $payment->doPayment();
             date_default_timezone_set('America/Sao_Paulo');
+
             $userOrder = [
                 'reference' => $reference,
                 'pagseguro_code' => $result->getCode(),
                 'pagseguro_status' => $result->getStatus(),
                 'items' => serialize($cartItems),
-                'store_id' => $stores[0]
+                'store_id' => $stores[0],
+/*                 'type' => $dataPost['paymentType'],
+                'link_boleto' => $result->getPaymentLink() */
             ];
 
             $userOrder = $user->orders()->create($userOrder);
@@ -62,12 +68,19 @@ class CheckoutController extends Controller
 
             session()->forget('cart');
             session()->forget('pagseguro_session_code');
+
+            $dataJson = [
+                'status' => true,
+                'message' => 'Pedido criado com sucesso!',
+                'order' => $reference
+            ];
+
+            if($dataPost['paymentType'] == 'BOLETO'){
+                $dataJson['link_boleto'] = $result->getPaymentLink();
+            }
+
             return response()->json([
-                'data' => [
-                    'status' => true,
-                    'message' => 'Pedido criado com sucesso!',
-                    'order' => $reference
-                ]
+                'data' => $dataJson
             ]);
         } catch (\Exception  $exception) {
             $message = env('APP_DEBUG') ? simplexml_load_string($exception->getMessage()) : 'Erro ao processar pedido!';
